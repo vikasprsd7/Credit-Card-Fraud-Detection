@@ -15,3 +15,23 @@ The only columns that remain in their original form are:
 - **Time**: The number of seconds that passed between the current transaction and the very first entry in the set.
 - **Amount**: The monetary value of the transaction, which is useful for cost-sensitive learning models.
 - **Class**: The target variable, where **1 indicates a fraudulent transaction** and **0 indicates a legitimate one**.
+
+
+**Key Considerations for Analysis**
+
+Because of the extreme scarcity of the positive class ($0.172\%$), standard accuracy metrics will likely be misleading. When working with this data, one should focus on:
+- **Area Under the Precision-Recall Curve (AUPRC)**: Since the dataset is skewed, the Confusion Matrix and AUPRC are generally more informative than the standard Accuracy score.
+- **Data Resampling**: Techniques like **SMOTE (Synthetic Minority Over-sampling Technique)** or random under-sampling may be necessary to balance the training set.
+- **Scaling**: While the PCA components ($V1-V28$) are already scaled, the Time and Amount features are not and will likely require normalization or standardization before being fed into most machine learning algorithms.
+
+
+
+
+
+
+
+
+
+
+
+

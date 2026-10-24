@@ -51,22 +51,53 @@ Because of the extreme scarcity of the positive class ($0.172\%$), standard accu
 
 ## Approach
  
-1. **Explore:** check missing values and visualise the class imbalance and the `Amount` / `Time` distributions.
-2. **Scale:** apply `RobustScaler` to `Amount` and `Time` (robust to outliers).
-3. **Hold out a real test set:** stratified 5-fold split, keeping the last fold. Train: 227,846 rows. Test: 56,961 rows (98 frauds, 56,863 genuine). The test set stays unbalanced, like real life.
-4. **Method A, random undersampling:** keep all 492 frauds plus 492 random genuine transactions (50/50 sample).
-5. **Feature insight:** correlation heatmaps and box plots on the balanced sample. `V17, V14, V12, V10` are lower for fraud; `V11, V4, V2, V19` are higher.
+1. **Explore:** Check missing values and visualise the class imbalance and the `Amount` / `Time` distributions.
+2. **Scale:** Apply `RobustScaler` to `Amount` and `Time` (robust to outliers).
+3. **Hold out a real test set:** Stratified 5-fold split, keeping the last fold. Train: 227,846 rows. Test: 56,961 rows (98 frauds, 56,863 genuine). The test set stays unbalanced, like real life.
+4. **Method A, random undersampling:** Keep all 492 frauds plus 492 random genuine transactions (50/50 sample).
+5. **Feature insight:** Correlation heatmaps and box plots on the balanced sample. `V17, V14, V12, V10` are lower for fraud; `V11, V4, V2, V19` are higher.
 6. **Outlier removal:** IQR rule (1.5 × IQR) on `V14`, `V12`, `V10`; about 950 rows remain.
 7. **Visual separability:** t-SNE, PCA and Truncated SVD projections to 2D.
 8. **Classic models:** Logistic Regression, K-Nearest Neighbours, SVC and Decision Tree, tuned with `GridSearchCV` and cross-validated.
-9. **Method B, SMOTE:** synthetic fraud examples are created **inside** each cross-validation fold (training rows only) to avoid data leakage.
-10. **Neural network comparison:** the same small Keras network (30 → 32 → 2, about 1,988 parameters, 20 epochs, Adam, learning rate 0.001) is trained on undersampled data and on SMOTE data, then both are tested on the original test set.
+9. **Method B, SMOTE:** Synthetic fraud examples are created **inside** each cross-validation fold (training rows only) to avoid data leakage.
+10. **Neural network comparison:** The same small Keras network (30 → 32 → 2, about 1,988 parameters, 20 epochs, Adam, learning rate 0.001) is trained on undersampled data and on SMOTE data, then both are tested on the original test set.
 
 
+## Results
+ 
+### Classic classifiers (5-fold cross-validation on the balanced training data)
+ 
+| Classifier | CV accuracy |
+|---|---|
+| Logistic Regression | 93.26% |
+| Support Vector Classifier | 93.25% |
+| K-Nearest Neighbours | 92.06% |
+| Decision Tree | 91.54% |
 
 
+### Neural network on the real test set (98 frauds, 56,863 genuine)
+ 
+| | Undersampled | SMOTE |
+|---|---|---|
+| Frauds caught | 92 | 72 |
+| Frauds missed | 6 | 26 |
+| Genuine transactions wrongly flagged | 1,550 | 15 |
+| Recall | ~93.9% | ~73.5% |
+| Precision | ~5.6% | ~82.8% |
+| Alerts per real fraud caught | ~18 | ~1.2 |
+ 
+### Logistic Regression with SMOTE (real test set)
+ 
+Fraud precision 0.11, recall 0.86, F1 0.20. Average precision (precision-recall curve): **0.76** with SMOTE versus **0.07** for the undersampled model.
+ 
+*Percentages are calculated from the confusion matrices printed in the notebook. Exact numbers change slightly between runs because of random shuffling.*
 
-
-
+## Key takeaways
+ 
+- **Accuracy is misleading.** Predicting "genuine" every time scores 99.83%.
+- **Undersampling is a "catch everything" model:** very few missed frauds, but about 1,550 genuine customers flagged.
+- **SMOTE is a "be sure before blocking" model:** almost every alert is real, but more fraud slips through.
+- **The best choice depends on cost:** what a missed fraud costs versus what a false alarm and manual review cost.
+- **Resample inside cross-validation, never before it,** and always test on untouched, realistic data.
 
 

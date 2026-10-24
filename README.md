@@ -10,7 +10,6 @@ Fraud is only **0.17%** of card transactions, so a model that never flags fraud 
 - [Results](#results)
 - [Key takeaways](#key-takeaways)
 - [Limitations and next steps](#limitations-and-next-steps)
-- [Getting started](#getting-started)
 - [Repository structure](#repository-structure)
 - [Skills demonstrated](#skills-demonstrated)
 
@@ -100,4 +99,42 @@ Fraud precision 0.11, recall 0.86, F1 0.20. Average precision (precision-recall 
 - **The best choice depends on cost:** what a missed fraud costs versus what a false alarm and manual review cost.
 - **Resample inside cross-validation, never before it,** and always test on untouched, realistic data.
 
+
+## Limitations and next steps
+ 
+Known limitations:
+ 
+- The 190-row balanced sample used to compare the classic classifiers is small and overlaps with data the SMOTE model trained on, so those scores are optimistic.
+- The final accuracy table compares undersampling (measured on the 190-row sample) with SMOTE (measured on the full test set), so the two numbers are not directly comparable.
+- The "How it should be" cell (NearMiss inside cross-validation) reports precision 0.00, which appears to come from a label misalignment after reshuffling the data. Do not rely on it.
+- Only 98 frauds are in the test set, so results vary noticeably between runs.
+- Outlier removal was applied to the undersampled data only.
+- Features are anonymised, and the data covers only two days.
+Ideas for improvement:
+ 
+- Choose the decision threshold using a cost model.
+- Use precision-recall AUC as the headline metric.
+- Try gradient boosting (for example XGBoost) and class weights.
+- Use a time-based train/test split.
+- Repeat experiments and report the average and spread.
+
+  ## Repository structure
+ 
+```
+.
+├── Credit_Card_fraud.ipynb   # Full analysis and model comparison
+├── creditcard.csv            # Not included: download from Kaggle
+└── README.md
+```
+
+## Skills demonstrated
+ 
+- Working with highly imbalanced data and choosing suitable metrics
+- Data scaling (`RobustScaler`) and IQR outlier handling
+- Random undersampling, NearMiss and SMOTE without data leakage
+- Model building and tuning: Logistic Regression, KNN, SVC, Decision Tree, `GridSearchCV`, cross-validation
+- Evaluation: confusion matrix, precision, recall, F1, ROC and precision-recall curves
+- PCA, t-SNE and Truncated SVD for visualisation
+- Neural networks with Keras
+- Turning model output into a business trade-off for a fintech or banking audience
 
